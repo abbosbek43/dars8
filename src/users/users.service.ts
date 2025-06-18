@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto, LoginDto } from './dto/craete.dtao';
 import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { UpdateUserDto } from './dto/update.dto';
 
 @Injectable()
 export class UsersService {
@@ -26,7 +27,7 @@ export class UsersService {
       },
     });
 
-    const token = this.jwtSer5vice.sign({ id: user.id, email: user.email });
+    const token = this.jwtSer5vice.sign({ id: user.id, email: user.email , roles:user.role});
     return {
       message: 'User created succesfully',
       acces_token: token,
@@ -49,6 +50,30 @@ export class UsersService {
       acces_token: token,
     };
   }
+  async  getall(){
+    return await this.prisma.user.findMany()
+  }
+  async getOne(id:number){
+    return await this.prisma.user.findFirst({
+      where:{id}
+    })
+  }
+  async update(id: number,data:UpdateUserDto){
+    const user = await this.prisma.user.findUnique({where:{id}})
+    if(!user) throw new NotFoundException("user not found")
+    return await this.prisma.user.update({
+      where:{id},
+      data
+    })
+  }
+  async deleteUser(id:number){
+    const user = await this.prisma.user.findUnique({where:{id}})
+    if(!user) throw new NotFoundException("user not found")
+    return await this.prisma.user.delete({where:{id}})
+
+    return "user succesfully deleted"
+  }
+
 
 
 }
